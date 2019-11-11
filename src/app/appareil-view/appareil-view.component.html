@@ -1,0 +1,8 @@
+    <h2>Mes appareils</h2>
+    <p>Date de mise à jour : {{ dateMaj | async | date: 'd/M/y, h:mm' }}</p>
+    <ul class="list-group">
+        <app-appareil *ngFor="let appareil of appareils; let i = index" [appareilName]="appareil.name"
+            [appareilStatus]="appareil.status" [appareilIndex]="i" [appareilId]="appareil.id"></app-appareil>
+    </ul>
+    <button class="btn btn-success mr-3" (click)="onAllumer()">Tout allumer</button>
+    <button class="btn btn-danger" (click)="onEteindre()">Tout éteindre</button>
