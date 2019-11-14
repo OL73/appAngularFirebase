@@ -3,12 +3,15 @@ import { Injectable } from '@angular/core';
 import { Subject } from 'rxjs/Subject'; // Permet de recevoir les informations et choisir les informations qui seront transmises 
                                         // Utilisatation de Subject pour renforcer le contionnement de l'appli sans bugs
                                         // le subject émettra la liste des appareils quand on lui demandera de le faire
+import { HttpClient } from '@angular/common/http';
+import { error } from 'util';
 
 @Injectable() // Injectable() = permet d'utiliser un service dans un autre service
 export class AppareilService {
 
     constructor(
-        private route: Router
+        private route: Router,
+        private httpClient: HttpClient
     ) { }
 
     // *** Etape 2 *** : ajouter le Subject : indiquer de quel type de données il gèrera
@@ -87,5 +90,31 @@ export class AppareilService {
         const newAppareil = {id: newId, name: name, status: status};
         this.appareils.push(newAppareil);
         this.emitAppareilSubject();
+    }
+
+    // Méthode push et put pour envoyer des données vers le serveur
+    // la méthode put(), permet d'enregistrer les données et de les écraser pour éviter quelles se répètent dans la bdd
+    saveAppareilToServer() {
+        this.httpClient.put('https://appangularfirebase-273ad.firebaseio.com/appareils.json', this.appareils).subscribe(
+            () => {
+                console.log('enregistrement terminé !');
+            },
+            (error) => {
+                console.log('Erreur de sauvegarde !'+ error);
+            }
+        );
+    }
+
+    getAppareilsFromServer() {
+        this.httpClient.get<any[]>('https://appangularfirebase-273ad.firebaseio.com/appareils.json').subscribe(
+            (Response) => {
+                this.appareils = Response; // une erreur est obtenue parce que l'observable présume que le valeur retournée est de type Object
+                                            // pour éviter le problème, on cast la méthode get pour lui dire qu'il va recevoir un Objet de type <any[]>
+                this.emitAppareilSubject();
+            },                              
+            (error) => {
+                console.log('erreur de chargement !' + error);
+            }
+        );
     }
 }
